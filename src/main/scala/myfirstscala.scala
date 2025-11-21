@@ -8,3 +8,4 @@ object MyApp extends JFXApp3:
 
 
 end MyApp
+hello
