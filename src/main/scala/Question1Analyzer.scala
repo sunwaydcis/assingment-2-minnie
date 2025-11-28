@@ -43,7 +43,7 @@ object Question1Analyzer extends Analyzer[HotelBooking] {
       val (topCountry, count) = countryBookings.maxBy(_._2)
 
       //Display results
-      println("1. 🏆 COUNTRY WITH HIGHEST NUMBER OF BOOKINGS")
+      println("1. COUNTRY WITH HIGHEST NUMBER OF BOOKINGS")
       println(s"   ► Country: $topCountry")
       println(s"   ► Number of bookings: $count")
 
@@ -67,7 +67,7 @@ object Question1Analyzer extends Analyzer[HotelBooking] {
     val avgBookingsPerCountry = bookings.size.toDouble / totalCountries
     val dataQuality = dataQualityScore(bookings)
 
-    println(s"\n📈 Statistical Insights:")
+    println(s"\nStatistical Insights:")
     println(f"   • Unique countries: $totalCountries")
     println(f"   • Average bookings per country: $avgBookingsPerCountry%.1f")
     println(f"   • Data quality score: $dataQuality%.1f%%")
