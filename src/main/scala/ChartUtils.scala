@@ -12,7 +12,7 @@ object ChartUtils {
     val maxValue = data.map(_._2).max //Find maximum value for scaling
     val maxLabelLength = data.map(_._1.length).max //Find longest label for padding
 
-    println(s"\n📊 $title") //Chart title with emoji
+    println(s"\n$title") //Chart title with emoji
     println("─" * 60) //Horizontal line for visual seperation
 
     //display each bar
