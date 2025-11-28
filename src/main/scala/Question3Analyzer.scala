@@ -37,7 +37,7 @@ object Question3Analyzer extends Analyzer[HotelBooking] {
       val biasResults = calculateBiasProfitability(parsed)
       val nonBiasResults = calculateNonBiasProfitability(parsed)
 
-      println("3. 🚀 MOST PROFITABLE HOTELS")
+      println("3. MOST PROFITABLE HOTELS")
 
       //Show bias analysis results (high-quality data only)
       if (biasResults.nonEmpty) {
@@ -119,7 +119,7 @@ object Question3Analyzer extends Analyzer[HotelBooking] {
     val avgMargin = bookings.map(_.profitMargin).sum / bookings.size
     val totalVisitors = bookings.map(_.visitors).sum
 
-    println(s"\n📈 Profitability Insights:")
+    println(s"\nProfitability Insights:")
     println(f"   • Total estimated profit: $$$totalProfit%.2f")
     println(f"   • Average profit margin: ${avgMargin * 100}%.1f%%")
     println(s"   • Total visitors: $totalVisitors")
