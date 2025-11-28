@@ -28,7 +28,7 @@ object DataValidator {
         return
       }
 
-      println(s"\n🔍 DATA VALIDATION REPORT")
+      println(s"\nDATA VALIDATION REPORT")
       println("─" * 40)
       //Print each check with status emoji base on percentage
       checks.foreach { case (check, passed, total) =>
