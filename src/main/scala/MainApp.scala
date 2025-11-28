@@ -1,16 +1,20 @@
+//MainApp.scala
 import scala.io.Source
 import java.nio.file.Paths
 import java.io.File
 
+//Main application object - entry point of the program
 object MainApp {
+  //Main method - program entry point
   def main(args: Array[String]): Unit = {
     println("🏨 === ADVANCED HOTEL BOOKING DATA ANALYSIS === 🏨\n")
 
-    val file = findDatasetFile()
+    val file = findDatasetFile() //Locate the dataset file
 
     if (file.exists()) {
-      analyzeFile(file)
+      analyzeFile(file) //Analyse if file exists
     } else {
+      //Show error message with helpful information
       println("❌ Hotel_Dataset.csv not found")
       println("Please make sure the file is in one of these locations:")
       println("   • src/main/resources/Hotel_Dataset.csv")
@@ -19,26 +23,32 @@ object MainApp {
     }
   }
 
+  //Find the dataset file in common locations
   private def findDatasetFile(): File = {
+    //Try classpath resources first
     val resourceUrl = getClass.getResource("/Hotel_Dataset.csv")
     if (resourceUrl != null) {
       return new File(resourceUrl.toURI)
     }
 
+    //Try project root
     val rootFile = new File("Hotel_Dataset.csv")
     if (rootFile.exists()) return rootFile
 
+    //Try current directory
     val currentDirFile = new File("./Hotel_Dataset.csv")
     if (currentDirFile.exists()) return currentDirFile
 
-    new File("Hotel_Dataset.csv")
+    new File("Hotel_Dataset.csv") //Return non-existent file as last resort
   }
 
+  //Analyze the found CSV file
   private def analyzeFile(file: File): Unit = {
     try {
       println(s"📁 Reading file: ${file.getAbsolutePath}")
       println(s"📊 File size: ${file.length()} bytes")
 
+      //Try reading with UTF-8, fall back to ISO-8859-1 if needed
       val lines = try {
         Source.fromFile(file, "UTF-8").getLines().toList
       } catch {
@@ -46,9 +56,10 @@ object MainApp {
           Source.fromFile(file, "ISO-8859-1").getLines().toList
       }
 
-      analyzeData(lines)
+      analyzeData(lines) //Proceed with data analysis
     } catch {
       case e: Exception =>
+        //Comprehensive error handling with troubleshooting tips
         println(s"❌ Error reading file: ${e.getMessage}")
         e.printStackTrace() // This will show the full error
         println("\n🔧 Troubleshooting tips:")
@@ -59,6 +70,7 @@ object MainApp {
     }
   }
 
+  //Main data analysis pipeline
   private def analyzeData(lines: List[String]): Unit = {
     if (lines.isEmpty) {
       println("Dataset file is empty or could not be read")
@@ -73,8 +85,8 @@ object MainApp {
       return
     }
 
-    val header = lines.head.split(",").map(_.trim)
-    val rows = lines.tail
+    val header = lines.head.split(",").map(_.trim) //Extract column headers
+    val rows = lines.tail //Data rows (excluding header)
 
     println(s"📈 Header columns: ${header.mkString(", ")}")
     println(s"📊 Data rows: ${rows.size}")
@@ -84,18 +96,20 @@ object MainApp {
     println(s"🔍 Successfully parsed ${sampleParsed.size} sample rows")
 
     if (sampleParsed.nonEmpty) {
-
+      //Parse all data and run validation
       val allParsed = rows.flatMap(Question1Analyzer.parse(_, header))
       DataValidator.validateHotelData(allParsed).printReport()
 
       println("🎯 Starting full analysis...\n")
 
+      //Define all analyzers to run
       val analyzers: List[Analyzer[_]] = List(
         Question1Analyzer,
         Question2Analyzer,
         Question3Analyzer
       )
 
+      //Run each analyzer with formatted output
       analyzers.zipWithIndex.foreach { case (analyzer, index) =>
         println("\n" + "═" * 80)
         println(s"🔍 QUESTION ${index + 1}")
@@ -105,17 +119,20 @@ object MainApp {
         analyzer.analyze(rows, header)
       }
 
+      //Completion message
       println("\n" + "🎉" * 40)
       println("ANALYSIS COMPLETED SUCCESSFULLY!")
       println("🎉" * 40)
 
-      showFinalSummary(rows, header)
+      showFinalSummary(rows, header) //Show final summary
     } else {
+      //Data parsing failed
       println("❌ Could not parse any data rows. Please check CSV format.")
       println("💡 Expected columns: Hotel Name, Origin Country, Booking Price[SGD], Discount, Profit Margin, No. Of People")
     }
   }
 
+  //Display final summary of the analysis
   private def showFinalSummary(rows: List[String], header: Array[String]): Unit = {
     val bookings = rows.flatMap(Question1Analyzer.parse(_, header))
     if (bookings.nonEmpty) {
@@ -127,6 +144,7 @@ object MainApp {
       println(f"• Total revenue: $$${bookings.map(_.bookingPrice).sum}%.2f")
       println(f"• Average discount: ${bookings.map(_.discount).sum / bookings.size}%.1f%%")
 
+      //Show analysis coverage
       val biasHotels = Question3Analyzer.calculateBiasProfitability(bookings).size
       val nonBiasHotels = Question3Analyzer.calculateNonBiasProfitability(bookings).size
       println(s"• High-quality hotels (bias analysis): $biasHotels")
