@@ -7,7 +7,7 @@ import java.io.File
 object MainApp {
   //Main method - program entry point
   def main(args: Array[String]): Unit = {
-    println("🏨 === ADVANCED HOTEL BOOKING DATA ANALYSIS === 🏨\n")
+    println("=== ADVANCED HOTEL BOOKING DATA ANALYSIS ===\n")
 
     val file = findDatasetFile() //Locate the dataset file
 
@@ -15,7 +15,7 @@ object MainApp {
       analyzeFile(file) //Analyse if file exists
     } else {
       //Show error message with helpful information
-      println("❌ Hotel_Dataset.csv not found")
+      println("Hotel_Dataset.csv not found")
       println("Please make sure the file is in one of these locations:")
       println("   • src/main/resources/Hotel_Dataset.csv")
       println("   • Project root folder (same as build.sbt)")
@@ -60,9 +60,9 @@ object MainApp {
     } catch {
       case e: Exception =>
         //Comprehensive error handling with troubleshooting tips
-        println(s"❌ Error reading file: ${e.getMessage}")
+        println(s"Error reading file: ${e.getMessage}")
         e.printStackTrace() // This will show the full error
-        println("\n🔧 Troubleshooting tips:")
+        println("\nTroubleshooting tips:")
         println("   • Check if the file is a valid CSV (open in text editor)")
         println("   • Try saving the file with UTF-8 encoding")
         println("   • Ensure the file is not corrupted")
@@ -81,7 +81,7 @@ object MainApp {
 
     // Check if we have a header and data
     if (lines.size < 2) {
-      println("❌ File doesn't contain enough data (need header + at least 1 row)")
+      println("File doesn't contain enough data (need header + at least 1 row)")
       return
     }
 
@@ -93,14 +93,14 @@ object MainApp {
 
     // Test parsing a few rows to check data format
     val sampleParsed = rows.take(5).flatMap(Question1Analyzer.parse(_, header))
-    println(s"🔍 Successfully parsed ${sampleParsed.size} sample rows")
+    println(s"Successfully parsed ${sampleParsed.size} sample rows")
 
     if (sampleParsed.nonEmpty) {
       //Parse all data and run validation
       val allParsed = rows.flatMap(Question1Analyzer.parse(_, header))
       DataValidator.validateHotelData(allParsed).printReport()
 
-      println("🎯 Starting full analysis...\n")
+      println("Starting full analysis...\n")
 
       //Define all analyzers to run
       val analyzers: List[Analyzer[_]] = List(
@@ -112,23 +112,23 @@ object MainApp {
       //Run each analyzer with formatted output
       analyzers.zipWithIndex.foreach { case (analyzer, index) =>
         println("\n" + "═" * 80)
-        println(s"🔍 QUESTION ${index + 1}")
+        println(s"QUESTION ${index + 1}")
         println("═" * 80)
-        println(s"📋 ${analyzer.label.toUpperCase}")
+        println(s"${analyzer.label.toUpperCase}")
         println("─" * 50)
         analyzer.analyze(rows, header)
       }
 
       //Completion message
-      println("\n" + "🎉" * 40)
+      println("\n" + "-" * 40)
       println("ANALYSIS COMPLETED SUCCESSFULLY!")
-      println("🎉" * 40)
+      println("-" * 40)
 
       showFinalSummary(rows, header) //Show final summary
     } else {
       //Data parsing failed
-      println("❌ Could not parse any data rows. Please check CSV format.")
-      println("💡 Expected columns: Hotel Name, Origin Country, Booking Price[SGD], Discount, Profit Margin, No. Of People")
+      println("Could not parse any data rows. Please check CSV format.")
+      println("Expected columns: Hotel Name, Origin Country, Booking Price[SGD], Discount, Profit Margin, No. Of People")
     }
   }
 
@@ -136,7 +136,7 @@ object MainApp {
   private def showFinalSummary(rows: List[String], header: Array[String]): Unit = {
     val bookings = rows.flatMap(Question1Analyzer.parse(_, header))
     if (bookings.nonEmpty) {
-      println(s"\n📈 FINAL SUMMARY")
+      println(s"\nFINAL SUMMARY")
       println("─" * 30)
       println(s"• Total bookings analyzed: ${bookings.size}")
       println(s"• Unique hotels: ${bookings.map(_.hotel).toSet.size}")
