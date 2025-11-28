@@ -33,31 +33,31 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
     val parsed = rows.flatMap(parse(_, header))
 
     if (parsed.nonEmpty) {
-      println("2. 💰 MOST ECONOMICAL HOTELS BY DIFFERENT CRITERIA")
+      println("2. MOST ECONOMICAL HOTELS BY DIFFERENT CRITERIA")
 
       //Calculate correlation between price and discount
       val correlation = calculatePriceDiscountCorrelation(parsed)
 
       //Find cheapest hotel by booking price
       val cheapestHotel = parsed.minBy(_.bookingPrice)
-      println("2a. 💵 BY BOOKING PRICE - Most economical hotel:")
+      println("2a. BY BOOKING PRICE - Most economical hotel:")
       println(s"   ► Hotel: ${cheapestHotel.hotel}")
       println(s"   ► Price: $${cheapestHotel.bookingPrice}")
 
       //Find hotel with highest discount
       val highestDiscountHotel = parsed.maxBy(_.discount)
-      println("2b. 🎯 BY DISCOUNT - Most economical hotel:")
+      println("2b. BY DISCOUNT - Most economical hotel:")
       println(s"   ► Hotel: ${highestDiscountHotel.hotel}")
       println(s"   ► Discount: ${highestDiscountHotel.discount}%")
 
       //Find hotel with lowest profit margin (most competitve pricing)
       val lowestMarginHotel = parsed.minBy(_.profitMargin)
-      println("2c. 📊 BY PROFIT MARGIN - Most economical hotel:")
+      println("2c. BY PROFIT MARGIN - Most economical hotel:")
       println(s"   ► Hotel: ${lowestMarginHotel.hotel}")
       println(s"   ► Profit Margin: ${(lowestMarginHotel.profitMargin * 100).formatted("%.1f")}%")
 
       //Statistical insights
-      println(s"2d. 📈 STATISTICAL INSIGHT:")
+      println(s"2d. STATISTICAL INSIGHT:")
       println(f"   ► Price-Discount Correlation: $correlation%.3f")
       //Interpret correlation coefficient
       val correlationInterpretation = if (correlation < -0.3) "Strong negative"
@@ -79,7 +79,7 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
         .take(8)
         .map { case (hotel, score) => (hotel.hotel, score) }
 
-      barChart("🏅 BEST VALUE HOTELS (Overall Score)", bestValueHotels)
+      barChart("BEST VALUE HOTELS (Overall Score)", bestValueHotels)
       showStatistics(parsed)
     } else {
       println("No valid hotel data found for analysis")
@@ -127,7 +127,7 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
       bookings.map(b => Math.pow(b.bookingPrice - avgPrice, 2)).sum / bookings.size
     )
 
-    println(s"\n📈 Price Analysis:")
+    println(s"\nPrice Analysis:")
     println(f"   • Average booking price: $$$avgPrice%.2f")
     println(f"   • Average discount: $avgDiscount%.1f%%")
     println(f"   • Price standard deviation: $$$priceStdDev%.2f")
