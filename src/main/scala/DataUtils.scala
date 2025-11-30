@@ -1,4 +1,3 @@
-//DataUtils.scala
 import scala.util.Try
 
 //Utility object for data parsing and validation
