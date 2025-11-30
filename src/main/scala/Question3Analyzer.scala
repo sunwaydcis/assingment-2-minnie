@@ -1,7 +1,5 @@
-//Question3Analyzer.scala
 import DataUtils._
 import ChartUtils._
-
 //Analyzer for finding most profitable hotels with bias and non-bias approaches
 object Question3Analyzer extends Analyzer[HotelBooking] {
   def label = "Most Profitable Hotel Analysis"
