@@ -1,6 +1,4 @@
-//ChartUtils.scala
-
-//Utility object for creating console-based charts and visualizatios
+//Utility object for creating console-based charts and visualizations
 object ChartUtils {
   //Create a bar chart in the console
   //title:Chart title
@@ -13,7 +11,7 @@ object ChartUtils {
     val maxLabelLength = data.map(_._1.length).max //Find longest label for padding
 
     println(s"\n$title") //Chart title with emoji
-    println("─" * 60) //Horizontal line for visual seperation
+    println("─" * 60) //Horizontal line for visual separation
 
     //display each bar
     data.take(maxBars).foreach { case (label, value) =>
@@ -28,7 +26,7 @@ object ChartUtils {
   //Creates a progress bar string
   // value: current value
   // max: Maximum value
-  //length: length of the prgoress bar in characters
+  //length: length of the progress bar in characters
   def progressBar(value: Double, max: Double, length: Int = 30): String = {
     val progress = ((value / max) * length).toInt //Calculate progress length
     "█" * progress + "░" * (length - progress) //Filled + empty parts
