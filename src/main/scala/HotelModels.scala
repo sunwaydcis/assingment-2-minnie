@@ -1,10 +1,8 @@
-//HotelModels.scala
-
 //Case class representing a single hotel booking record
 case class HotelBooking (
   hotel: String, //Hotel name
   country: String, //Country of origin
-  bookingPrice: Double, // Price in SDG
+  bookingPrice: Double, // Price in SGD
   discount: Double, //Discount percentage
   profitMargin: Double, //Profit margin (0-1)
   visitors: Int //Number of people
