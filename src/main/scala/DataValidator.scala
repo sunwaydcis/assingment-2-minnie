@@ -1,5 +1,3 @@
-//DataValidator.scala
-
 //Object for validating hotel booking data quality
 object DataValidator {
   //Validates a list of hotel bookings and returns a validation report
