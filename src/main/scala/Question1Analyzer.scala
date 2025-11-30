@@ -1,4 +1,3 @@
-//Question1Analyzer.scala
 import DataUtils._
 import ChartUtils._
 
