@@ -1,4 +1,3 @@
-//MainApp.scala
 import scala.io.Source
 import java.nio.file.Paths
 import java.io.File
