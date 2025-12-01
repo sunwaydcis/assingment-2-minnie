@@ -37,19 +37,19 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
       //Calculate correlation between price and discount
       val correlation = calculatePriceDiscountCorrelation(parsed)
 
-      //Find cheapest hotel by booking price
+      //Find the cheapest hotel by booking price
       val cheapestHotel = parsed.minBy(_.bookingPrice)
       println("i. BY BOOKING PRICE - Most economical hotel:")
       println(s"   ► Hotel: ${cheapestHotel.hotel}")
       println(s"   ► Price: $${cheapestHotel.bookingPrice}")
 
-      //Find hotel with highest discount
+      //Find hotel with the highest discount
       val highestDiscountHotel = parsed.maxBy(_.discount)
       println("ii. BY DISCOUNT - Most economical hotel:")
       println(s"   ► Hotel: ${highestDiscountHotel.hotel}")
       println(s"   ► Discount: ${highestDiscountHotel.discount}%")
 
-      //Find hotel with lowest profit margin (most competitve pricing)
+      //Find hotel with the lowest profit margin (most competitive pricing)
       val lowestMarginHotel = parsed.minBy(_.profitMargin)
       println("iii. BY PROFIT MARGIN - Most economical hotel:")
       println(s"   ► Hotel: ${lowestMarginHotel.hotel}")
