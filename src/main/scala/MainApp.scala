@@ -23,26 +23,27 @@ object MainApp {
     }
   }
 
-  //Find the dataset file in common locations
+  //Searches for the dataset file in multiple locations.
+  //@return File object if found, otherwise a new File object
   private def findDatasetFile(): File = {
-    //Try classpath resources first
+    //Try loading from classpath/resource first
     val resourceUrl = getClass.getResource("/Hotel_Dataset.csv")
     if (resourceUrl != null) {
       return new File(resourceUrl.toURI)
     }
 
-    //Try project root
+    //Fallback to project root
     val rootFile = new File("Hotel_Dataset.csv")
     if (rootFile.exists()) return rootFile
 
-    //Try current directory
+    //Fallback to current directory
     val currentDirFile = new File("./Hotel_Dataset.csv")
     if (currentDirFile.exists()) return currentDirFile
 
-    new File("Hotel_Dataset.csv") //Return non-existent file as last resort
+    new File("Hotel_Dataset.csv") //Return default (will fail later with helpful message)
   }
 
-  //Analyze the found CSV file
+  //Read and analyze CSV file
   private def analyzeFile(file: File): Unit = {
     try {
       println(s"📁 Reading file: ${file.getAbsolutePath}")
@@ -56,12 +57,12 @@ object MainApp {
           Source.fromFile(file, "ISO-8859-1").getLines().toList
       }
 
-      analyzeData(lines) //Proceed with data analysis
+      analyzeData(lines)
     } catch {
       case e: Exception =>
         //Comprehensive error handling with troubleshooting tips
         println(s"Error reading file: ${e.getMessage}")
-        e.printStackTrace() // This will show the full error
+        e.printStackTrace() // Debug information
         println("\nTroubleshooting tips:")
         println("   • Check if the file is a valid CSV (open in text editor)")
         println("   • Try saving the file with UTF-8 encoding")
