@@ -1,4 +1,5 @@
 //Case class representing a single hotel booking record
+//Demon immutable data structures and domain modeling.
 case class HotelBooking (
   hotel: String, //Hotel name
   country: String, //Country of origin
@@ -9,6 +10,7 @@ case class HotelBooking (
 )
 
 //Case class representing aggregated statistics for a hotel
+//Demonstrates data aggregation patterns.
 case class HotelStats(
   hotel: String, //Hotel name
   totalBookings: Int, //Total number of bookings
