@@ -46,13 +46,13 @@ object Question1Analyzer extends Analyzer[HotelBooking] {
       println(s"   ► Country: $topCountry")
       println(s"   ► Number of bookings: $count")
 
-      //Prepare top 10 countries for bar chart
+      //Prepare top 7 countries for bar chart
       val topCountries = countryBookings.toList
         .sortBy(-_._2) //Sort descending by count
         .take(10)
         .map((country, count) => (country, count.toDouble))
 
-      barChart("TOP 10 COUNTRIES BY BOOKINGS", topCountries)
+      barChart("TOP 7 COUNTRIES BY BOOKINGS", topCountries)
 
       showStatistics(parsed) //Show additional statistics
     } else {
