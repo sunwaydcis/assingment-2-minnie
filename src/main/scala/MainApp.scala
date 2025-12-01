@@ -2,9 +2,10 @@ import scala.io.Source
 import java.nio.file.Paths
 import java.io.File
 
-//Main application object - entry point of the program
+//Main application object that coordinates the data analysis pipeline.
+//Demonstrates application orchestration and error handling.
 object MainApp {
-  //Main method - program entry point
+  //Main entry point of the application.
   def main(args: Array[String]): Unit = {
     println("=== ADVANCED HOTEL BOOKING DATA ANALYSIS ===\n")
 
