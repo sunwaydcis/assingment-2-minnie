@@ -1,4 +1,5 @@
-//Generic trait for data analysis components
+//Generic trait defining the interface for all data analyzer
+//Demonstrates polymorphism through type parameter T.
 trait Analyzer[T] { //T is the type of data being analyzed
   def label: String //Display name for this analyzer
   def parse(row: String, header: Array[String]): Option[T]
