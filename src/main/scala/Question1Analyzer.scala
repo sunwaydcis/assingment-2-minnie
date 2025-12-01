@@ -1,7 +1,7 @@
 import DataUtils._
 import ChartUtils._
 
-//Analyzer for finding the country with highest number of bookings
+//Analyzer for finding the country with the highest number of bookings
 object Question1Analyzer extends Analyzer[HotelBooking] {
   def label = "Highest Booking Country Analysis"
 
@@ -46,13 +46,13 @@ object Question1Analyzer extends Analyzer[HotelBooking] {
       println(s"   ► Country: $topCountry")
       println(s"   ► Number of bookings: $count")
 
-      //Prepare top 7 countries for bar chart
+      //Prepare top countries for bar chart
       val topCountries = countryBookings.toList
         .sortBy(-_._2) //Sort descending by count
         .take(10)
         .map((country, count) => (country, count.toDouble))
 
-      barChart("TOP 7 COUNTRIES BY BOOKINGS", topCountries)
+      barChart("TOP COUNTRIES BY BOOKINGS", topCountries)
 
       showStatistics(parsed) //Show additional statistics
     } else {
