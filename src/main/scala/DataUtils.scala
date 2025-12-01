@@ -1,6 +1,7 @@
 import scala.util.Try
 
-//Utility object for data parsing and validation
+//Utility object for safe CSV parsing and data validation.
+//Demonstrates error handling and functional programming patterns.
 object DataUtils {
   //Splits CSV row while handling quoted fields with commas
   //Uses regular expressions to only split on commas outside quotes
