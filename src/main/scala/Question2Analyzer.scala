@@ -1,4 +1,3 @@
-//Question2Analyzer.scala
 import DataUtils._
 import ChartUtils._
 
@@ -47,20 +46,12 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
       val mostEconomical = hotelMetrics.minBy(_._2)
 
       println(s"   ► Most Economical Hotel: ${mostEconomical._1}")
-<<<<<<< HEAD
       println(f"   ► Average Booking Price: $$${mostEconomical._2}%.2f")
-=======
-      println(f"   ► Average Booking Price: $$${mostEconomical._3}%.2f")
->>>>>>> d73c14873f6c1410908990dd70e27ab71f2a3e54
       println(f"   ► Average Discount: ${mostEconomical._3}%.1f%%")
       println(f"   ► Average Profit Margin: ${mostEconomical._4 * 100}%.1f%%")
       println(s"   ► Based on ${mostEconomical._5} bookings")
 
-<<<<<<< HEAD
-      // Show top 10 cheapest hotels for comparison
-=======
       // Show top cheapest hotels for comparison
->>>>>>> d73c14873f6c1410908990dd70e27ab71f2a3e54
       val cheapestHotels = hotelMetrics
         .sortBy(_._2)  // Sort by price ascending
         .take(10)
@@ -113,11 +104,6 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
     else covariance / (priceStdDev * discountStdDev)
   }
 
-  override def showStatistics(bookings: List[HotelBooking]): Unit = {
-<<<<<<< HEAD
-
-  }
-=======
+  override def showStatistics(bookings: List[HotelBooking]): Unit= {
     }
->>>>>>> d73c14873f6c1410908990dd70e27ab71f2a3e54
 }
