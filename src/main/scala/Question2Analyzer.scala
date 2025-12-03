@@ -1,3 +1,4 @@
+//Question2Analyzer.scala - with lecturer's method
 import DataUtils._
 import ChartUtils._
 
@@ -28,7 +29,7 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
     val parsed = rows.flatMap(parse(_, header))
 
     if (parsed.nonEmpty) {
-      println("2. MOST ECONOMICAL HOTEL")
+      println("2. MOST ECONOMICAL HOTEL (Combined Criteria)")
 
       // Group by hotel and calculate averages for each hotel
       val hotelGroups = parsed.groupBy(_.hotel)
@@ -42,27 +43,67 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
         (hotelName, avgPrice, avgDiscount, avgProfitMargin, totalBookings)
       }.toList
 
-      // Find hotel with the lowest average price (most economical)
-      val mostEconomical = hotelMetrics.minBy(_._2)
+      // Get min and max values for normalization
+      val prices = hotelMetrics.map(_._2)
+      val discounts = hotelMetrics.map(_._3)
+      val margins = hotelMetrics.map(_._4)
+
+      val minPrice = prices.min
+      val maxPrice = prices.max
+      val minDiscount = discounts.min
+      val maxDiscount = discounts.max
+      val minMargin = margins.min
+      val maxMargin = margins.max
+
+      // Calculate normalized scores for each hotel
+      val hotelsWithScores = hotelMetrics.map { case (hotel, price, discount, margin, bookings) =>
+        // 1. Price: LOWER is better, so invert the normalized score
+        // Normalized price: (price - min) / (max - min) → higher = more expensive
+        // Economical price score: 1 - normalized_price → higher = more economical
+        val normalizedPrice = (price - minPrice) / (maxPrice - minPrice)
+        val priceScore = 1 - normalizedPrice  // Invert so lower price = higher score
+
+        // 2. Discount: HIGHER is better
+        // Normalized discount: (discount - min) / (max - min)
+        val discountScore = (discount - minDiscount) / (maxDiscount - minDiscount)
+
+        // 3. Profit Margin: LOWER is better (hotel keeps less profit), so invert
+        val normalizedMargin = (margin - minMargin) / (maxMargin - minMargin)
+        val marginScore = 1 - normalizedMargin  // Invert so lower margin = higher score
+
+        // Combine scores (equal weight for all three criteria)
+        val totalScore = (priceScore + discountScore + marginScore) / 3
+
+        (hotel, totalScore, price, discount, margin, bookings, priceScore, discountScore, marginScore)
+      }
+
+      // Find hotel with the highest total score (most economical)
+      val mostEconomical = hotelsWithScores.maxBy(_._2)
 
       println(s"   ► Most Economical Hotel: ${mostEconomical._1}")
-      println(f"   ► Average Booking Price: $$${mostEconomical._2}%.2f")
-      println(f"   ► Average Discount: ${mostEconomical._3}%.1f%%")
-      println(f"   ► Average Profit Margin: ${mostEconomical._4 * 100}%.1f%%")
-      println(s"   ► Based on ${mostEconomical._5} bookings")
+      println(f"   ► Average Booking Price: $$${mostEconomical._3}%.2f")
+      println(f"   ► Average Discount: ${mostEconomical._4}%.1f%%")
+      println(f"   ► Average Profit Margin: ${mostEconomical._5 * 100}%.1f%%")
+      println(s"   ► Based on ${mostEconomical._6} bookings")
+      println(f"   ► Combined Economical Score: ${mostEconomical._2}%.3f")
 
-      // Show top cheapest hotels for comparison
-      val cheapestHotels = hotelMetrics
-        .sortBy(_._2)  // Sort by price ascending
-        .take(10)
-        .map { case (hotel, price, discount, margin, bookings) =>
-          // Format hotel name for display
+      // Show detailed score breakdown
+      println(s"\n   SCORE BREAKDOWN:")
+      println(f"   • Price Score:        ${mostEconomical._7}%.3f (lower price = higher score)")
+      println(f"   • Discount Score:     ${mostEconomical._8}%.3f (higher discount = higher score)")
+      println(f"   • Profit Margin Score: ${mostEconomical._9}%.3f (lower margin = higher score)")
+
+      // Prepare top 8 hotels for bar chart
+      val topEconomicalHotels = hotelsWithScores
+        .sortBy(-_._2)  // Sort by total score descending
+        .take(8)
+        .map { case (hotel, score, price, discount, margin, bookings, _, _, _) =>
           val shortName = if (hotel.length > 20) hotel.take(17) + "..." else hotel
-          (shortName, price)
+          (shortName, score * 100)  // Multiply by 100 for better bar chart display
         }
 
-      // Display bar chart of cheapest hotels
-      barChart("CHEAPEST HOTELS (Average Price)", cheapestHotels)
+      // Display bar chart
+      barChart("TOP ECONOMICAL HOTELS (Combined Score)", topEconomicalHotels)
 
       // Statistical insights
       val correlation = calculatePriceDiscountCorrelation(parsed)
@@ -104,6 +145,7 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
     else covariance / (priceStdDev * discountStdDev)
   }
 
-  override def showStatistics(bookings: List[HotelBooking]): Unit= {
-    }
+  override def showStatistics(bookings: List[HotelBooking]): Unit = {
+    // Empty implementation
+  }
 }
