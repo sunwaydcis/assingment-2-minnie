@@ -12,7 +12,7 @@ object Question1Analyzer extends Analyzer[HotelBooking] {
     // Use for-comprehension to safely extract all required fields
     for {
       hotel <- safeGet(cols, header.indexOf("Hotel Name"))
-      country <- safeGet(cols, header.indexOf("Origin Country"))
+      destinationCountry <- safeGet(cols, header.indexOf("Destination Country"))
       price <- safeDouble(cols, header.indexOf("Booking Price[SGD]"))
       discountStr <- safeGet(cols, header.indexOf("Discount"))
       margin <- safeDouble(cols, header.indexOf("Profit Margin"))
@@ -20,7 +20,7 @@ object Question1Analyzer extends Analyzer[HotelBooking] {
     }
     yield HotelBooking(
       hotel,
-      country,
+      destinationCountry,  // Now using destination country
       price,
       parseDiscount(discountStr),
       margin,
@@ -42,9 +42,11 @@ object Question1Analyzer extends Analyzer[HotelBooking] {
       val (topCountry, count) = countryBookings.maxBy(_._2)
 
       //Display results
-      println("1. COUNTRY WITH HIGHEST NUMBER OF BOOKINGS")
-      println(s"   ► Country: $topCountry")
+      println("1.  ► COUNTRY WITH HIGHEST NUMBER OF BOOKINGS")
+      println(s"   ► Destination Country: $topCountry") // Clarify it's destination
       println(s"   ► Number of bookings: $count")
+      println(s"   ► Note: Based on destination countries (where people traveled to)")
+
 
       //Prepare top countries for bar chart
       val topCountries = countryBookings.toList
