@@ -1,4 +1,3 @@
-//Question2Analyzer.scala
 import DataUtils._
 import ChartUtils._
 
@@ -43,11 +42,11 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
         (hotelName, avgPrice, avgDiscount, avgProfitMargin, totalBookings)
       }.toList
 
-      // Find hotel with lowest average price (most economical)
+      // Find hotel with the lowest average price (most economical)
       val mostEconomical = hotelMetrics.minBy(_._2)
 
       println(s"   ► Most Economical Hotel: ${mostEconomical._1}")
-      println(s"   ► Average Booking Price: $$${mostEconomical._2}%.2f")
+      println(f"   ► Average Booking Price: $$${mostEconomical._2}%.2f")
       println(f"   ► Average Discount: ${mostEconomical._3}%.1f%%")
       println(f"   ► Average Profit Margin: ${mostEconomical._4 * 100}%.1f%%")
       println(s"   ► Based on ${mostEconomical._5} bookings")
@@ -106,6 +105,6 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
   }
 
   override def showStatistics(bookings: List[HotelBooking]): Unit = {
-    // Empty implementation - we don't want extra statistics
+
   }
 }
