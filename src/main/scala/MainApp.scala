@@ -1,111 +1,156 @@
-//Question2Analyzer.scala
-import DataUtils._
-import ChartUtils._
+import scala.io.Source
+import java.nio.file.Paths
+import java.io.File
 
-object Question2Analyzer extends Analyzer[HotelBooking] {
-  def label = "Most Economical Hotel Analysis"
+//Main application object - entry point of the program
+object MainApp {
+  //Main method - program entry point
+  def main(args: Array[String]): Unit = {
+    println("=== ADVANCED HOTEL BOOKING DATA ANALYSIS ===\n")
 
-  def parse(row: String, header: Array[String]): Option[HotelBooking] = {
-    val cols = splitRow(row)
+    val file = findDatasetFile() //Locate the dataset file
 
-    for {
-      hotel <- safeGet(cols, header.indexOf("Hotel Name"))
-      country <- safeGet(cols, header.indexOf("Origin Country"))
-      price <- safeDouble(cols, header.indexOf("Booking Price[SGD]"))
-      discountStr <- safeGet(cols, header.indexOf("Discount"))
-      margin <- safeDouble(cols, header.indexOf("Profit Margin"))
-      visitors <- safeInt(cols, header.indexOf("No. Of People"))
-    } yield HotelBooking(
-      hotel,
-      country,
-      price,
-      parseDiscount(discountStr),
-      margin,
-      visitors
-    )
-  }
-
-  def analyze(rows: List[String], header: Array[String]): Unit = {
-    val parsed = rows.flatMap(parse(_, header))
-
-    if (parsed.nonEmpty) {
-      println("2. MOST ECONOMICAL HOTEL")
-
-      // Group by hotel and calculate averages for each hotel
-      val hotelGroups = parsed.groupBy(_.hotel)
-
-      val hotelMetrics = hotelGroups.map { case (hotelName, bookings) =>
-        val avgPrice = bookings.map(_.bookingPrice).sum / bookings.size
-        val avgDiscount = bookings.map(_.discount).sum / bookings.size
-        val avgProfitMargin = bookings.map(_.profitMargin).sum / bookings.size
-        val totalBookings = bookings.size
-
-        (hotelName, avgPrice, avgDiscount, avgProfitMargin, totalBookings)
-      }.toList
-
-      // Find hotel with lowest average price (most economical)
-      val mostEconomical = hotelMetrics.minBy(_._2)
-
-      println(s"   ► Most Economical Hotel: ${mostEconomical._1}")
-      println(s"   ► Average Booking Price: $$${mostEconomical._2}%.2f")
-      println(f"   ► Average Discount: ${mostEconomical._3}%.1f%%")
-      println(f"   ► Average Profit Margin: ${mostEconomical._4 * 100}%.1f%%")
-      println(s"   ► Based on ${mostEconomical._5} bookings")
-
-      // Show top 10 cheapest hotels for comparison
-      val cheapestHotels = hotelMetrics
-        .sortBy(_._2)  // Sort by price ascending
-        .take(10)
-        .map { case (hotel, price, discount, margin, bookings) =>
-          // Format hotel name for display
-          val shortName = if (hotel.length > 20) hotel.take(17) + "..." else hotel
-          (shortName, price)
-        }
-
-      // Display bar chart of cheapest hotels
-      barChart("CHEAPEST HOTELS (Average Price)", cheapestHotels)
-
-      // Statistical insights
-      val correlation = calculatePriceDiscountCorrelation(parsed)
-      println(s"\n   STATISTICAL INSIGHTS:")
-      println(f"   • Price-Discount Correlation: $correlation%.3f")
-
-      val correlationInterpretation = correlation match {
-        case c if c < -0.5 => "Strong negative"
-        case c if c < -0.3 => "Moderate negative"
-        case c if c < -0.1 => "Weak negative"
-        case c if c > 0.5 => "Strong positive"
-        case c if c > 0.3 => "Moderate positive"
-        case c if c > 0.1 => "Weak positive"
-        case _ => "No correlation"
-      }
-      println(s"   • Interpretation: $correlationInterpretation relationship")
-      println(s"   • Note: Negative correlation means cheaper hotels tend to offer higher discounts")
-
+    if (file.exists()) {
+      analyzeFile(file) //Analyse if file exists
     } else {
-      println("No valid hotel data found for analysis")
+      //Show error message with helpful information
+      println("Hotel_Dataset.csv not found")
+      println("Please make sure the file is in one of these locations:")
+      println("   • src/main/resources/Hotel_Dataset.csv")
+      println("   • Project root folder (same as build.sbt)")
+      println("   • Current working directory")
     }
   }
 
-  private def calculatePriceDiscountCorrelation(bookings: List[HotelBooking]): Double = {
-    val prices = bookings.map(_.bookingPrice)
-    val discounts = bookings.map(_.discount)
+  //Find the dataset file in common locations
+  private def findDatasetFile(): File = {
+    //Try classpath resources first
+    val resourceUrl = getClass.getResource("/Hotel_Dataset.csv")
+    if (resourceUrl != null) {
+      return new File(resourceUrl.toURI)
+    }
 
-    val avgPrice = prices.sum / prices.size
-    val avgDiscount = discounts.sum / discounts.size
+    //Try project root
+    val rootFile = new File("Hotel_Dataset.csv")
+    if (rootFile.exists()) return rootFile
 
-    val covariance = bookings.map(b =>
-      (b.bookingPrice - avgPrice) * (b.discount - avgDiscount)
-    ).sum / bookings.size
+    //Try current directory
+    val currentDirFile = new File("./Hotel_Dataset.csv")
+    if (currentDirFile.exists()) return currentDirFile
 
-    val priceStdDev = Math.sqrt(prices.map(p => Math.pow(p - avgPrice, 2)).sum / prices.size)
-    val discountStdDev = Math.sqrt(discounts.map(d => Math.pow(d - avgDiscount, 2)).sum / discounts.size)
-
-    if (priceStdDev * discountStdDev == 0) 0.0
-    else covariance / (priceStdDev * discountStdDev)
+    new File("Hotel_Dataset.csv") //Return non-existent file as last resort
   }
 
-  override def showStatistics(bookings: List[HotelBooking]): Unit = {
-    // Empty implementation - we don't want extra statistics
+  //Analyze the found CSV file
+  private def analyzeFile(file: File): Unit = {
+    try {
+      println(s"📁 Reading file: ${file.getAbsolutePath}")
+      println(s"📊 File size: ${file.length()} bytes")
+
+      //Try reading with UTF-8, fall back to ISO-8859-1 if needed
+      val lines = try {
+        Source.fromFile(file, "UTF-8").getLines().toList
+      } catch {
+        case _: Exception =>
+          Source.fromFile(file, "ISO-8859-1").getLines().toList
+      }
+
+      analyzeData(lines) //Proceed with data analysis
+    } catch {
+      case e: Exception =>
+        //Comprehensive error handling with troubleshooting tips
+        println(s"Error reading file: ${e.getMessage}")
+        e.printStackTrace() // This will show the full error
+        println("\nTroubleshooting tips:")
+        println("   • Check if the file is a valid CSV (open in text editor)")
+        println("   • Try saving the file with UTF-8 encoding")
+        println("   • Ensure the file is not corrupted")
+        println("   • Check file permissions")
+    }
+  }
+
+  //Main data analysis pipeline
+  private def analyzeData(lines: List[String]): Unit = {
+    if (lines.isEmpty) {
+      println("Dataset file is empty or could not be read")
+      return
+    }
+
+    println(s"✅ Successfully read ${lines.size} lines")
+
+    // Check if we have a header and data
+    if (lines.size < 2) {
+      println("File doesn't contain enough data (need header + at least 1 row)")
+      return
+    }
+
+    val header = lines.head.split(",").map(_.trim) //Extract column headers
+    val rows = lines.tail //Data rows (excluding header)
+
+    println(s"📈 Header columns: ${header.mkString(", ")}")
+    println(s"📊 Data rows: ${rows.size}")
+
+    // Test parsing a few rows to check data format
+    val sampleParsed = rows.take(5).flatMap(Question1Analyzer.parse(_, header))
+    println(s"Successfully parsed ${sampleParsed.size} sample rows")
+
+    if (sampleParsed.nonEmpty) {
+      //Parse all data and run validation
+      val allParsed = rows.flatMap(Question1Analyzer.parse(_, header))
+      DataValidator.validateHotelData(allParsed).printReport()
+
+      println("Starting full analysis...\n")
+
+      //Define all analyzers to run
+      val analyzers: List[Analyzer[_]] = List(
+        Question1Analyzer,
+        Question2Analyzer,
+        Question3Analyzer
+      )
+
+      //Run each analyzer with formatted output
+      analyzers.zipWithIndex.foreach { case (analyzer, index) =>
+        println("\n" + "═" * 80)
+        println(s"QUESTION ${index + 1}")
+        println("═" * 80)
+        println(s"${analyzer.label.toUpperCase}")
+        println("─" * 50)
+        analyzer.analyze(rows, header)
+      }
+
+      //Completion message
+      println("\n" + "-" * 40)
+      println("ANALYSIS COMPLETED SUCCESSFULLY!")
+      println("-" * 40)
+
+      showFinalSummary(rows, header) //Show final summary
+    } else {
+      //Data parsing failed
+      println("Could not parse any data rows. Please check CSV format.")
+      println("Expected columns: Hotel Name, Origin Country, Booking Price[SGD], Discount, Profit Margin, No. Of People")
+    }
+  }
+
+  //Display final summary of the analysis
+  private def showFinalSummary(rows: List[String], header: Array[String]): Unit = {
+    val bookings = rows.flatMap(Question1Analyzer.parse(_, header))
+    if (bookings.nonEmpty) {
+      println(s"\nFINAL SUMMARY")
+      println("─" * 30)
+      println(s"• Total bookings analyzed: ${bookings.size}")
+      println(s"• Unique hotels: ${bookings.map(_.hotel).toSet.size}")
+      println(s"• Unique countries: ${bookings.map(_.country).toSet.size}")
+      val totalRevenue = bookings.map(_.bookingPrice).sum
+      println(f"• Total revenue: $$$totalRevenue%.2f")
+      val avgDiscount = bookings.map(_.discount).sum / bookings.size
+      println(f"• Average discount: $avgDiscount%.1f%%")
+
+
+      // Calculate and display overall profitability metrics
+      val totalProfit = bookings.map(b => b.bookingPrice * b.profitMargin).sum
+      println(f"• Total profit: $$$totalProfit%.2f")
+      val avgProfitMargin = bookings.map(_.profitMargin).sum / bookings.size * 100
+      println(f"• Average profit margin: $avgProfitMargin%.1f%%")
+    }
   }
 }
