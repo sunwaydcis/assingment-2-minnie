@@ -142,14 +142,17 @@ object MainApp {
       println(s"• Total bookings analyzed: ${bookings.size}")
       println(s"• Unique hotels: ${bookings.map(_.hotel).toSet.size}")
       println(s"• Unique countries: ${bookings.map(_.country).toSet.size}")
-      println(f"• Total revenue: $$${bookings.map(_.bookingPrice).sum}%.2f")
-      println(f"• Average discount: ${bookings.map(_.discount).sum / bookings.size}%.1f%%")
+      val totalRevenue = bookings.map(_.bookingPrice).sum
+      println(f"• Total revenue: $$$totalRevenue%.2f")
+      val avgDiscount = bookings.map(_.discount).sum / bookings.size
+      println(f"• Average discount: $avgDiscount%.1f%%")
 
-      //Show analysis coverage
-      val biasHotels = Question3Analyzer.calculateBiasProfitability(bookings).size
-      val nonBiasHotels = Question3Analyzer.calculateNonBiasProfitability(bookings).size
-      println(s"• High-quality hotels (bias analysis): $biasHotels")
-      println(s"• All hotels (non-bias analysis): $nonBiasHotels")
+
+      // Calculate and display overall profitability metrics
+      val totalProfit = bookings.map(b => b.bookingPrice * b.profitMargin).sum
+      println(f"• Total profit: $$$totalProfit%.2f")
+      val avgProfitMargin = bookings.map(_.profitMargin).sum / bookings.size * 100
+      println(f"• Average profit margin: $avgProfitMargin%.1f%%")
     }
   }
 }
