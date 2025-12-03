@@ -1,3 +1,4 @@
+//Question3Analyzer.scala
 import DataUtils._
 import ChartUtils._
 
@@ -42,7 +43,6 @@ object Question3Analyzer extends Analyzer[HotelBooking] {
         val totalBookings = bookings.size
 
         // Profitability score: total profit (revenue × profit margin)
-        // This considers both number of visitors (through revenue) and profit margin
         val profitabilityScore = totalProfit
 
         (hotelName, profitabilityScore, totalProfit, totalRevenue,
@@ -55,17 +55,17 @@ object Question3Analyzer extends Analyzer[HotelBooking] {
       // Format currency values
       val formattedTotalProfit = f"${mostProfitable._3}%.2f"
       val formattedTotalRevenue = f"${mostProfitable._4}%.2f"
-
+      
       println(s"   ► Most Profitable Hotel: ${mostProfitable._1}")
-      println(s"   ► Total Profit: $$ $formattedTotalProfit")
-      println(s"   ► Total Revenue: $$ $formattedTotalRevenue")
+      println(s"   ► Total Profit: $$$formattedTotalProfit")
+      println(s"   ► Total Revenue: $$$formattedTotalRevenue")
       println(s"   ► Total Visitors: ${mostProfitable._5}")
       println(f"   ► Average Profit Margin: ${mostProfitable._6 * 100}%.1f%%")
       println(s"   ► Total Bookings: ${mostProfitable._7}")
 
       // Calculate profit per visitor for insight
       val profitPerVisitor = mostProfitable._3 / mostProfitable._5
-      println(f"   ► Profit per Visitor: $$ $profitPerVisitor%.2f")
+      println(f"   ► Profit per Visitor: $$$profitPerVisitor%.2f")
 
       // Prepare top 8 most profitable hotels for bar chart
       val topProfitableHotels = hotelProfitability
@@ -92,55 +92,19 @@ object Question3Analyzer extends Analyzer[HotelBooking] {
     val totalProfit = bookings.map(b => b.bookingPrice * b.profitMargin).sum
     val totalRevenue = bookings.map(_.bookingPrice).sum
     val totalVisitors = bookings.map(_.visitors).sum
-    val overallMargin = (totalProfit / totalRevenue) * 100
+    val overallMargin = if (totalRevenue > 0) (totalProfit / totalRevenue) * 100 else 0.0
 
-    println(s"\n   PROFITABILITY STATISTICS:")
-    println(f"   • Total Industry Profit: $$ $totalProfit%.2f")
-    println(f"   • Total Industry Revenue: $$ $totalRevenue%.2f")
+    println(s"\n   INDUSTRY OVERVIEW:")
+    println(f"   • Total Industry Profit: $$$totalProfit%.2f")
+    println(f"   • Total Industry Revenue: $$$totalRevenue%.2f")
     println(f"   • Overall Profit Margin: $overallMargin%.1f%%")
     println(s"   • Total Visitors: $totalVisitors")
 
     if (totalVisitors > 0) {
       val avgProfitPerVisitor = totalProfit / totalVisitors
       val avgRevenuePerVisitor = totalRevenue / totalVisitors
-      println(f"   • Average Profit per Visitor: $$ $avgProfitPerVisitor%.2f")
-      println(f"   • Average Revenue per Visitor: $$ $avgRevenuePerVisitor%.2f")
-    }
-
-    // Show top 3 hotels by different metrics
-    val hotelGroups = bookings.groupBy(_.hotel)
-
-    // Top by total profit
-    val topByProfit = hotelGroups.map { case (hotel, hotelBookings) =>
-      val profit = hotelBookings.map(b => b.bookingPrice * b.profitMargin).sum
-      (hotel, profit)
-    }.toList.sortBy(-_._2).take(3)
-
-    println("\n   TOP 3 BY PROFIT:")
-    topByProfit.zipWithIndex.foreach { case ((hotel, profit), index) =>
-      println(f"   ${index + 1}. $hotel: $$ $profit%.2f")
-    }
-
-    // Top by profit margin
-    val topByMargin = hotelGroups.map { case (hotel, hotelBookings) =>
-      val margin = hotelBookings.map(_.profitMargin).sum / hotelBookings.size
-      (hotel, margin * 100)
-    }.toList.sortBy(-_._2).take(3)
-
-    println("\n   TOP 3 BY PROFIT MARGIN:")
-    topByMargin.zipWithIndex.foreach { case ((hotel, margin), index) =>
-      println(f"   ${index + 1}. $hotel: $margin%.1f%%")
-    }
-
-    // Top by visitors
-    val topByVisitors = hotelGroups.map { case (hotel, hotelBookings) =>
-      val visitors = hotelBookings.map(_.visitors).sum
-      (hotel, visitors)
-    }.toList.sortBy(-_._2).take(3)
-
-    println("\n   TOP 3 BY VISITORS:")
-    topByVisitors.zipWithIndex.foreach { case ((hotel, visitors), index) =>
-      println(f"   ${index + 1}. $hotel: $visitors visitors")
+      println(f"   • Average Profit per Visitor: $$$avgProfitPerVisitor%.2f")
+      println(f"   • Average Revenue per Visitor: $$$avgRevenuePerVisitor%.2f")
     }
   }
 }
