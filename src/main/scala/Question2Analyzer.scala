@@ -1,11 +1,10 @@
+//Question2Analyzer.scala
 import DataUtils._
 import ChartUtils._
 
-//Analyzer for finding most economical hotels by different criteria
 object Question2Analyzer extends Analyzer[HotelBooking] {
   def label = "Most Economical Hotel Analysis"
 
-  //Parse CSV row into HotelBooking object
   def parse(row: String, header: Array[String]): Option[HotelBooking] = {
     val cols = splitRow(row)
 
@@ -16,8 +15,7 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
       discountStr <- safeGet(cols, header.indexOf("Discount"))
       margin <- safeDouble(cols, header.indexOf("Profit Margin"))
       visitors <- safeInt(cols, header.indexOf("No. Of People"))
-    }
-    yield HotelBooking(
+    } yield HotelBooking(
       hotel,
       country,
       price,
@@ -27,76 +25,68 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
     )
   }
 
-  //Main analysis logic for question 2
   def analyze(rows: List[String], header: Array[String]): Unit = {
     val parsed = rows.flatMap(parse(_, header))
 
     if (parsed.nonEmpty) {
-      println("2. MOST ECONOMICAL HOTELS BY DIFFERENT CRITERIA")
+      println("2. MOST ECONOMICAL HOTEL")
 
-      //Calculate correlation between price and discount
+      // Group by hotel and calculate averages for each hotel
+      val hotelGroups = parsed.groupBy(_.hotel)
+
+      val hotelMetrics = hotelGroups.map { case (hotelName, bookings) =>
+        val avgPrice = bookings.map(_.bookingPrice).sum / bookings.size
+        val avgDiscount = bookings.map(_.discount).sum / bookings.size
+        val avgProfitMargin = bookings.map(_.profitMargin).sum / bookings.size
+        val totalBookings = bookings.size
+
+        (hotelName, avgPrice, avgDiscount, avgProfitMargin, totalBookings)
+      }.toList
+
+      // Find hotel with the lowest average price (most economical)
+      val mostEconomical = hotelMetrics.minBy(_._2)
+
+      println(s"   ► Most Economical Hotel: ${mostEconomical._1}")
+      println(f"   ► Average Booking Price: $$${mostEconomical._3}%.2f")
+      println(f"   ► Average Discount: ${mostEconomical._3}%.1f%%")
+      println(f"   ► Average Profit Margin: ${mostEconomical._4 * 100}%.1f%%")
+      println(s"   ► Based on ${mostEconomical._5} bookings")
+
+      // Show top cheapest hotels for comparison
+      val cheapestHotels = hotelMetrics
+        .sortBy(_._2)  // Sort by price ascending
+        .take(10)
+        .map { case (hotel, price, discount, margin, bookings) =>
+          // Format hotel name for display
+          val shortName = if (hotel.length > 20) hotel.take(17) + "..." else hotel
+          (shortName, price)
+        }
+
+      // Display bar chart of cheapest hotels
+      barChart("CHEAPEST HOTELS (Average Price)", cheapestHotels)
+
+      // Statistical insights
       val correlation = calculatePriceDiscountCorrelation(parsed)
+      println(s"\n   STATISTICAL INSIGHTS:")
+      println(f"   • Price-Discount Correlation: $correlation%.3f")
 
-      //Find the cheapest hotel by booking price
-      val cheapestHotel = parsed.minBy(_.bookingPrice)
-      println("i. BY BOOKING PRICE - Most economical hotel:")
-      println(s"   ► Hotel: ${cheapestHotel.hotel}")
-      println(s"   ► Price: $${cheapestHotel.bookingPrice}")
-
-      //Find hotel with the highest discount
-      val highestDiscountHotel = parsed.maxBy(_.discount)
-      println("ii. BY DISCOUNT - Most economical hotel:")
-      println(s"   ► Hotel: ${highestDiscountHotel.hotel}")
-      println(s"   ► Discount: ${highestDiscountHotel.discount}%")
-
-      //Find hotel with the lowest profit margin (most competitive pricing)
-      val lowestMarginHotel = parsed.minBy(_.profitMargin)
-      println("iii. BY PROFIT MARGIN - Most economical hotel:")
-      println(s"   ► Hotel: ${lowestMarginHotel.hotel}")
-      println(s"   ► Profit Margin: ${(lowestMarginHotel.profitMargin * 100).formatted("%.1f")}%")
-
-      //Statistical insights
-      println(s"STATISTICAL INSIGHT:")
-      println(f"   ► Price-Discount Correlation: $correlation%.3f")
-      //Interpret correlation coefficient
-      val correlationInterpretation = if (correlation < -0.3) "Strong negative"
-      else if (correlation < -0.1) "Weak negative"
-      else if (correlation > 0.3) "Strong positive"
-      else if (correlation > 0.1) "Weak positive"
-      else "No correlation"
-      println(s"   ► Interpretation: $correlationInterpretation relationship")
-
-      //Calculate value scores for all hotels
-      val hotelsWithValue = parsed.map { hotel =>
-        val valueScore = calculateValueScore(hotel)
-        (hotel, valueScore)
+      val correlationInterpretation = correlation match {
+        case c if c < -0.5 => "Strong negative"
+        case c if c < -0.3 => "Moderate negative"
+        case c if c < -0.1 => "Weak negative"
+        case c if c > 0.5 => "Strong positive"
+        case c if c > 0.3 => "Moderate positive"
+        case c if c > 0.1 => "Weak positive"
+        case _ => "No correlation"
       }
+      println(s"   • Interpretation: $correlationInterpretation relationship")
+      println(s"   • Note: Negative correlation means cheaper hotels tend to offer higher discounts")
 
-      //Get top 8 best value hotels
-      val bestValueHotels = hotelsWithValue
-        .sortBy(-_._2)
-        .take(8)
-        .map { case (hotel, score) => (hotel.hotel, score) }
-
-      barChart("BEST VALUE HOTELS (Overall Score)", bestValueHotels)
-      showStatistics(parsed)
     } else {
       println("No valid hotel data found for analysis")
     }
   }
 
-  //Calculate comprehensive value score considering multiple factors
-  private def calculateValueScore(hotel: HotelBooking): Double = {
-    val normalizedPrice = 1.0 / (hotel.bookingPrice / 100) // Lower price = higher score
-    val normalizedDiscount = hotel.discount / 10 // Higher discount = higher score
-    val normalizedMargin = (1.0 - hotel.profitMargin) * 10 // Lower margin = higher score
-    val popularity = math.log(hotel.visitors + 1) // More visitors = higher score
-
-    //weighted combination of factors
-    (normalizedPrice * 0.4) + (normalizedDiscount * 0.3) +
-      (normalizedMargin * 0.2) + (popularity * 0.1)
-  }
-  //Calculate Pearson correlation coefficient between price and discount
   private def calculatePriceDiscountCorrelation(bookings: List[HotelBooking]): Double = {
     val prices = bookings.map(_.bookingPrice)
     val discounts = bookings.map(_.discount)
@@ -104,37 +94,17 @@ object Question2Analyzer extends Analyzer[HotelBooking] {
     val avgPrice = prices.sum / prices.size
     val avgDiscount = discounts.sum / discounts.size
 
-    //Calculate covariance
     val covariance = bookings.map(b =>
       (b.bookingPrice - avgPrice) * (b.discount - avgDiscount)
     ).sum / bookings.size
 
-    //Calculate standard deviations
     val priceStdDev = Math.sqrt(prices.map(p => Math.pow(p - avgPrice, 2)).sum / prices.size)
     val discountStdDev = Math.sqrt(discounts.map(d => Math.pow(d - avgDiscount, 2)).sum / discounts.size)
 
-    //Calculate correlation coefficient
     if (priceStdDev * discountStdDev == 0) 0.0
     else covariance / (priceStdDev * discountStdDev)
   }
 
-  //Display price analysis statistics
   override def showStatistics(bookings: List[HotelBooking]): Unit = {
-    val avgPrice = bookings.map(_.bookingPrice).sum / bookings.size
-    val avgDiscount = bookings.map(_.discount).sum / bookings.size
-    val priceStdDev = Math.sqrt(
-      bookings.map(b => Math.pow(b.bookingPrice - avgPrice, 2)).sum / bookings.size
-    )
-
-    println(s"\nPrice Analysis:")
-    println(f"   • Average booking price: $$$avgPrice%.2f")
-    println(f"   • Average discount: $avgDiscount%.1f%%")
-    println(f"   • Price standard deviation: $$$priceStdDev%.2f")
-
-    //Categorize hotels by price range
-    val budgetHotels = bookings.count(_.bookingPrice < 100)
-    val luxuryHotels = bookings.count(_.bookingPrice > 300)
-    println(s"   • Budget hotels (<$$100): $budgetHotels")
-    println(s"   • Luxury hotels (>$$300): $luxuryHotels")
-  }
+    }
 }
