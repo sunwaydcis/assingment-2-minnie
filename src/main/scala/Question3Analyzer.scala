@@ -1,4 +1,3 @@
-//Question3Analyzer.scala
 import DataUtils._
 import ChartUtils._
 
@@ -42,44 +41,36 @@ object Question3Analyzer extends Analyzer[HotelBooking] {
         val avgProfitMargin = bookings.map(_.profitMargin).sum / bookings.size
         val totalBookings = bookings.size
 
-        // Profitability score: total profit (revenue × profit margin)
-        val profitabilityScore = totalProfit
-
-        (hotelName, profitabilityScore, totalProfit, totalRevenue,
-          totalVisitors, avgProfitMargin, totalBookings)
+        (hotelName, totalProfit, totalRevenue, totalVisitors, avgProfitMargin, totalBookings)
       }.toList
 
-      // Find most profitable hotel
+      // Find most profitable hotel (highest total profit)
       val mostProfitable = hotelProfitability.maxBy(_._2)
 
-      // Format currency values
-      val formattedTotalProfit = f"${mostProfitable._3}%.2f"
-      val formattedTotalRevenue = f"${mostProfitable._4}%.2f"
-      
+      println(s"\n   🏆 MOST PROFITABLE HOTEL RESULTS:")
       println(s"   ► Most Profitable Hotel: ${mostProfitable._1}")
-      println(s"   ► Total Profit: $$$formattedTotalProfit")
-      println(s"   ► Total Revenue: $$$formattedTotalRevenue")
-      println(s"   ► Total Visitors: ${mostProfitable._5}")
-      println(f"   ► Average Profit Margin: ${mostProfitable._6 * 100}%.1f%%")
-      println(s"   ► Total Bookings: ${mostProfitable._7}")
+      println(f"   ► Total Profit: $$${mostProfitable._2}%.2f")
+      println(f"   ► Total Revenue: $$${mostProfitable._3}%.2f")
+      println(s"   ► Total Visitors: ${mostProfitable._4}")
+      println(f"   ► Average Profit Margin: ${mostProfitable._5 * 100}%.1f%%")
+      println(s"   ► Total Bookings: ${mostProfitable._6}")
 
-      // Calculate profit per visitor for insight
-      val profitPerVisitor = mostProfitable._3 / mostProfitable._5
+      // Calculate profit per visitor
+      val profitPerVisitor = mostProfitable._2 / mostProfitable._4
       println(f"   ► Profit per Visitor: $$$profitPerVisitor%.2f")
 
       // Prepare top 8 most profitable hotels for bar chart
       val topProfitableHotels = hotelProfitability
-        .sortBy(-_._2)  // Sort by profitability score descending
+        .sortBy(-_._2)  // Sort by total profit descending
         .take(8)
-        .map { case (hotel, score, profit, revenue, visitors, margin, bookings) =>
-          // Shorten long hotel names for display
+        .map { case (hotel, profit, revenue, visitors, margin, bookings) =>
           val shortName = if (hotel.length > 18) hotel.take(15) + "..." else hotel
-          (shortName, profit)  // Use actual profit for chart height
+          (shortName, profit)
         }
 
       barChart("TOP PROFITABLE HOTELS (Total Profit)", topProfitableHotels)
 
-      // Statistical insights
+      // Show industry statistics
       showStatistics(parsed)
 
     } else {
@@ -92,19 +83,24 @@ object Question3Analyzer extends Analyzer[HotelBooking] {
     val totalProfit = bookings.map(b => b.bookingPrice * b.profitMargin).sum
     val totalRevenue = bookings.map(_.bookingPrice).sum
     val totalVisitors = bookings.map(_.visitors).sum
+    val totalBookings = bookings.size
     val overallMargin = if (totalRevenue > 0) (totalProfit / totalRevenue) * 100 else 0.0
 
-    println(s"\n   INDUSTRY OVERVIEW:")
+    println(s"\n   📈 INDUSTRY OVERVIEW:")
     println(f"   • Total Industry Profit: $$$totalProfit%.2f")
     println(f"   • Total Industry Revenue: $$$totalRevenue%.2f")
     println(f"   • Overall Profit Margin: $overallMargin%.1f%%")
     println(s"   • Total Visitors: $totalVisitors")
+    println(s"   • Total Bookings: $totalBookings")
 
     if (totalVisitors > 0) {
       val avgProfitPerVisitor = totalProfit / totalVisitors
       val avgRevenuePerVisitor = totalRevenue / totalVisitors
+      val avgVisitorsPerBooking = totalVisitors.toDouble / totalBookings
+
       println(f"   • Average Profit per Visitor: $$$avgProfitPerVisitor%.2f")
       println(f"   • Average Revenue per Visitor: $$$avgRevenuePerVisitor%.2f")
+      println(f"   • Average Visitors per Booking: $avgVisitorsPerBooking%.1f")
     }
   }
 }
