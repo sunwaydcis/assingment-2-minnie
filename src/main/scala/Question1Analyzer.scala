@@ -42,7 +42,7 @@ object Question1Analyzer extends Analyzer[HotelBooking] {
       val (topCountry, count) = countryBookings.maxBy(_._2)
 
       //Display results
-      println("1.  ► COUNTRY WITH HIGHEST NUMBER OF BOOKINGS")
+      println("1.  COUNTRY WITH HIGHEST NUMBER OF BOOKINGS")
       println(s"   ► Destination Country: $topCountry") // Clarify it's destination
       println(s"   ► Number of bookings: $count")
       println(s"   ► Note: Based on destination countries (where people traveled to)")
